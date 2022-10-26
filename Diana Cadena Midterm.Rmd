@@ -1,0 +1,102 @@
+---
+title: "Midterm"
+author: "Diana Cadena"
+date: "10/25/2022"
+output: html_document
+---
+
+
+```{r}
+#Plot and Inference
+
+library(readr)
+NJ_MedianListingPrice_AllHomes <- read_csv("C:/Users/Diana/Desktop/Business Forecasting - Fall 2022/NJ_MedianListingPrice_AllHomes.csv")
+NJ_Home_Raw <- NJ_MedianListingPrice_AllHomes$Value
+NJ_Home_TS <- ts(NJ_Home_Raw,frequency = 12, start = c(1996,4))
+plot(NJ_Home_TS)
+hist(NJ_Home_Raw)
+hist((NJ_Home_TS))
+#Diana Notes
+#There is a exponential increase from 2000 to 2005 with a maximum greater than 350,000 #and it drops down between 2005 to around 2012 and slowly starts to increase again after #2012
+
+#Central Tendency
+summary(NJ_Home_TS)
+summary(NJ_Home_Raw)
+boxplot(NJ_Home_Raw)
+boxplot(NJ_Home_TS)
+boxplot.stats(NJ_Home_Raw)
+boxplot.stats(NJ_Home_TS)
+#Diana Notes
+#The boxplot tells us that the majority of the home sales are in the range from 200000 to # 300000, the max is over 350000, the min is under 150000 and the median is between #250000 and 300000. After looking at the summary stats, it give us a more precise #information, Min. 142900 Median 280200   Max. 373100
+
+library(fpp)
+library(fpp2)
+library(TTR)
+
+#Decomposition
+ets_forecast <- ets(NJ_Home_TS)
+attributes(ets_forecast)
+plot(ets_forecast)
+ets_forecast$mse
+ets_forecast$residuals
+ets_forecast$fitted
+
+stl_decomp <- stl(NJ_Home_TS,s.window ="periodic")
+plot(stl_decomp)
+attributes(stl_decomp)
+seasadj(stl_decomp)
+plot(NJ_Home_TS)
+lines(seasadj(stl_decomp), col="Red")
+#Diana Notes
+# the TS is seasonal and it is additive 
+#Does seasonality have big fluctuations to the value of time series? NO
+
+
+# Naive
+naive_forecast <- naive(NJ_Home_TS,5)
+plot(naive_forecast)
+plot(naive_forecast$residuals)
+hist(naive_forecast$residuals)
+accuracy(naive_forecast)
+attributes(naive_forecast)
+attributes(naive_forecast$residuals)
+snaive_forecast <- snaive(NJ_Home_TS,5)
+acf(NJ_Home_TS)
+
+
+#Simple Moving Average 
+attributes(NJ_Home_TS)
+plot(NJ_Home_TS)
+MA3_forecast <- ma(NJ_Home_TS,order=3)
+MA6_forecast <- ma(NJ_Home_TS,order=6)
+MA9_forecast <- ma(NJ_Home_TS,order=9)
+lines(MA3_forecast,col="red")
+lines(MA6_forecast,col="blue")
+lines(MA9_forecast,col="green")
+#Diana Notes
+# As the moving average order goes up between 3 to 9, it seems to have about equal #weight and there is not much of a change. 
+
+
+#Simple Smoothing
+SSE_Simple <- HoltWinters(NJ_Home_TS,beta=FALSE,gamma=FALSE)
+attributes(SSE_Simple)
+plot(SSE_Simple)
+SSE_Simple$SSE
+
+
+#Holt-Winters
+tmp <- HoltWinters(NJ_Home_TS)
+attributes(tmp)
+plot(tmp)
+tmp_f <- forecast(tmp)
+attributes(tmp_f)
+plot(tmp_f$residuals)
+hist(tmp_f$residuals)
+Acf(tmp_f$residuals)
+accuracy(tmp_f)
+#Diana Notes
+# The residual plot indicates there is no discernible patterns 
+
+
+
+```
